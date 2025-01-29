@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postserviceblog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postserviceblog
+  template:
+    metadata:
+      labels:
+        app: postserviceblog
+    spec:
+      containers:
+        - name: postserviceblog
+          image: docker.io/library/postserviceblog:latest
+          imagePullPolicy: Never
+          env:
+            - name: SPRING_DATASOURCE_FLYWAY_URL
+              value: "jdbc:postgresql://host.docker.internal:5432/postAppBlog"
+            - name: SPRING_DATASOURCE_URL
+              value: "//host.docker.internal:5432/postAppBlog"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "postgres"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "1234"
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postserviceblog
+spec:
+  selector:
+    app: postserviceblog
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: NodePort
